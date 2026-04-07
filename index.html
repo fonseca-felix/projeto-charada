@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        body {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .riddler-bg {
+            background-color: #0a0a0a;
+            background-image: 
+                radial-gradient(circle at 100% 150%, #0a0a0a 24%, #0a2e0a 25%, #0a2e0a 28%, #0a0a0a 29%, #0a0a0a 36%, #0a2e0a 36%, #0a2e0a 40%, transparent 40%, transparent),
+                radial-gradient(circle at 0    150%, #0a0a0a 24%, #0a2e0a 25%, #0a2e0a 28%, #0a0a0a 29%, #0a0a0a 36%, #0a2e0a 36%, #0a2e0a 40%, transparent 40%, transparent),
+                radial-gradient(circle at 50%  100%, #0d3a0d 10%, #0a0a0a 11%, #0a0a0a 23%, #0d3a0d 24%, #0d3a0d 30%, #0a0a0a 31%, #0a0a0a 43%, #0d3a0d 44%, #0d3a0d 50%, #0a0a0a 51%, #0a0a0a 60%, #0d3a0d 61%, transparent 61%);
+            background-size: 100px 50px;
+        }
+        .text-glow {
+            text-shadow: 0 0 10px #22c55e, 0 0 20px #22c55e;
+        }
+        .text-shadow-red {
+            text-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
+        }
+        .box-glow {
+            box-shadow: 0 0 15px rgba(34,197,94,0.5);
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .correct-glow {
+            animation: correct-glow 1.5s forwards;
+        }
+        @keyframes correct-glow {
+            0% { box-shadow: 0 0 15px rgba(34,197,94,0.5); border-color: #22c55e; }
+            30% { box-shadow: 0 0 40px rgba(74,222,128,1); border-color: #4ade80; }
+            100% { box-shadow: 0 0 15px rgba(34,197,94,0.5); border-color: #22c55e; }
+        }
+    </style>
+    <title>Desafio do Charada</title>
+</head>
+<body class="riddler-bg text-green-500 min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative">
+
+    <!-- Decorações de Fundo -->
+    <div class="absolute top-10 left-10 text-green-700 opacity-20 text-6xl pointer-events-none select-none">?</div>
+    <div class="absolute bottom-10 right-10 text-green-700 opacity-20 text-8xl pointer-events-none select-none">?</div>
+    <div class="absolute top-1/4 right-20 text-green-700 opacity-10 text-5xl pointer-events-none select-none">?</div>
+    <div class="absolute bottom-1/4 left-32 text-green-700 opacity-10 text-7xl pointer-events-none select-none">?</div>
+
+    <!-- MAIN MENU -->
+    <div id="menu-screen" class="z-10 flex flex-col items-center w-full max-w-lg p-8 bg-black/90 border-2 border-green-500 rounded-lg box-glow">
+        <h1 class="text-5xl font-bold mb-8 text-white text-glow tracking-widest uppercase text-center">Desafio<br><span class="text-green-500 text-3xl">Do Charada</span></h1>
+        
+        <p class="text-green-400 mb-8 text-center italic leading-relaxed select-none">
+            "Posso ser sua salvação ou sua perdição. Teste sua mente antes que o tempo devore suas esperanças."
+        </p>
+
+        <div class="flex flex-col gap-5 w-full">
+            <button id="btn-casual" class="w-full bg-black/50 border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black hover:box-glow font-bold py-4 px-8 rounded transition-all duration-300 tracking-widest text-lg uppercase flex items-center justify-center">
+                Investigação (Casual)
+            </button>
+            <button id="btn-time" class="w-full bg-black/50 border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black hover:box-glow font-bold py-4 px-8 rounded transition-all duration-300 tracking-widest text-lg uppercase flex items-center justify-center">
+                Sob Pressão (30s)
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="z-10 hidden flex-col items-center w-full max-w-2xl">
+        
+        <!-- HUD -->
+        <div class="w-full flex justify-between items-center mb-6 bg-black/90 p-4 border border-green-500 rounded-lg box-glow">
+            <div class="flex gap-6">
+                <div class="text-green-500 font-bold tracking-widest">ACERTOS <span id="score-correct" class="text-white text-glow text-xl ml-2">0</span></div>
+                <div class="text-red-600 font-bold tracking-widest">ERROS <span id="score-wrong" class="text-red-400 text-shadow-red text-xl ml-2">0</span></div>
+            </div>
+            <div id="timer-container" class="hidden text-xl font-bold text-white text-glow flex items-center gap-2">
+                ⏱️ <span id="timer">30</span>s
+            </div>
+        </div>
+
+        <!-- ENIGMA CARD -->
+        <div class="w-full relative bg-black/90 border-2 border-green-500 rounded-lg p-8 sm:p-12 text-center box-glow mb-6 min-h-[250px] flex flex-col justify-center transition-colors duration-300" id="game-card">
+            <span class="absolute top-4 left-0 right-0 text-green-700 font-bold uppercase tracking-widest text-sm select-none">Arquivo do Enigma</span>
+            
+            <p id="pergunta" class="text-2xl sm:text-3xl font-medium text-white italic drop-shadow-md leading-snug">
+                Conectando ao submundo...
+            </p>
+
+            <!-- Área de Feedback flutuante -->
+            <p id="feedback-msg" class="absolute bottom-4 left-0 right-0 text-lg font-bold opacity-0 transition-opacity duration-300 tracking-wider text-shadow"></p>
+        </div>
+
+        <!-- INPUT AREA -->
+        <div class="w-full bg-black/90 border border-green-500 rounded-lg p-2 flex flex-col sm:flex-row gap-2 box-glow focus-within:box-glow transition-shadow">
+            <input type="text" id="answer-input" autocomplete="off" placeholder="Digite sua resposta..." class="flex-grow bg-transparent text-green-400 placeholder-green-800 outline-none p-4 text-xl focus:text-green-300 transition-colors uppercase tracking-widest">
+            <button id="btn-submit" class="bg-green-600 hover:bg-green-500 text-black shadow-[0_0_10px_#16a34a] font-bold py-3 px-8 rounded transition-colors uppercase tracking-widest text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                Decifrar
+            </button>
+        </div>
+        
+        <button id="btn-giveup" class="mt-8 text-green-700 hover:text-green-400 hover:text-glow transition-all tracking-widest text-sm uppercase">
+            Abandonar Caso (Voltar)
+        </button>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
