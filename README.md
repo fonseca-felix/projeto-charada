@@ -8,6 +8,7 @@ Para consumir as palavras e os enigmas, este frontend consome uma infraestrutura
 
 - **API Oficial das Charadas:** [https://charada-orpin.vercel.app](https://charada-orpin.vercel.app)
 - **Repositório GitHub do Backend:** [https://github.com/fonseca-felix/charada.git](https://github.com/fonseca-felix/charada.git)
+- **Projeto na vercel:** [Projeto-Charada](https://projeto-charada-six.vercel.app)
 
 ---
 
