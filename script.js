@@ -1,4 +1,11 @@
+// Este arquivo contém o código JavaScript para o jogo de charadas.
+// O jogo permite dois modos: casual (sem tempo) e time (com timer de 30 segundos).
+// O jogador responde charadas obtidas de uma API, e o placar é atualizado com acertos e erros.
+// Inclui animações visuais para feedback e bloqueio de input durante transições.
+
 // Capturando os elementos HTML do novo layout
+// Aqui são selecionados todos os elementos do DOM necessários para o jogo,
+// incluindo telas, botões, campos de entrada e displays de placar e timer.
 const menuScreen = document.getElementById("menu-screen");
 const gameScreen = document.getElementById("game-screen");
 
@@ -18,6 +25,8 @@ const gameCard = document.getElementById("game-card");
 const feedbackMsg = document.getElementById("feedback-msg");
 
 // --- Estado Global do Jogo ---
+// Objeto que armazena o estado atual do jogo, incluindo placar, modo selecionado,
+// charada atual, tempo restante e flags de bloqueio para evitar ações simultâneas.
 let gameState = {
     acertos: 0,
     erros: 0,
@@ -29,6 +38,8 @@ let gameState = {
 };
 
 // --- Event Listeners ---
+// Adiciona ouvintes de eventos aos botões e campo de entrada.
+// Permite iniciar o jogo em diferentes modos, voltar ao menu e enviar respostas.
 btnCasual.addEventListener('click', () => inciarJogo('casual'));
 btnTime.addEventListener('click', () => inciarJogo('time'));
 btnGiveUp.addEventListener('click', voltarMenu);
@@ -39,7 +50,11 @@ answerInput.addEventListener('keypress', (e) => {
 });
 
 // --- Funções de Navegação e Setup ---
+// Funções para iniciar o jogo em um modo específico, resetar o estado,
+// trocar entre telas e configurar o HUD (heads-up display) conforme o modo.
 function inciarJogo(modo) {
+    // Define o modo do jogo (casual ou time), reseta o placar e atualiza a interface.
+    // Troca para a tela do jogo e configura o timer se necessário.
     gameState.modo = modo;
     gameState.acertos = 0;
     gameState.erros = 0;
@@ -63,6 +78,7 @@ function inciarJogo(modo) {
 }
 
 function voltarMenu() {
+    // Para o timer se estiver rodando e volta para a tela do menu.
     pararTimer();
     gameScreen.classList.add('hidden');
     gameScreen.classList.remove('flex');
@@ -70,7 +86,11 @@ function voltarMenu() {
 }
 
 // --- Funções Core API ---
+// Função assíncrona para buscar uma charada aleatória da API.
+// Trata erros de conexão e tenta novamente se necessário.
 async function buscaCharada() {
+    // Bloqueia input, para o timer e mostra mensagem de carregamento.
+    // Faz requisição para a API, processa a resposta e inicia o timer se no modo time.
     bloquearInput(true);
     pararTimer();
 
@@ -102,7 +122,10 @@ async function buscaCharada() {
 }
 
 // --- Sistema de Validação Flexível ---
+// Funções para normalizar texto (remover acentos, pontuação) e verificar se a resposta do usuário está correta.
+// Permite flexibilidade, aceitando variações da resposta.
 function normalizarTexto(texto) {
+    // Normaliza o texto para comparação: converte para minúsculas, remove acentos e pontuação.
     if (!texto) return "";
     return texto
         .toLowerCase()
@@ -114,6 +137,9 @@ function normalizarTexto(texto) {
 }
 
 function verificarResposta(digitado, correta) {
+    // Verifica se a resposta digitada pelo usuário corresponde à correta.
+    // Primeiro, compara exatamente após normalização.
+    // Se não, verifica se contém palavras-chave principais.
     const digitadoNorm = normalizarTexto(digitado);
     const corretaNorm = normalizarTexto(correta);
 
@@ -134,7 +160,11 @@ function verificarResposta(digitado, correta) {
 }
 
 // --- Processamento da Jogada ---
+// Funções para enviar a resposta, processar acertos e erros,
+// atualizar o placar e mostrar feedback visual.
 function enviarResposta() {
+    // Verifica se o input não está bloqueado e se há uma resposta digitada.
+    // Para o timer, verifica a resposta e processa como acerto ou erro.
     // Evita double click
     if (gameState.bloqueado || !gameState.charadaAtual || !answerInput.value.trim()) return;
 
@@ -152,6 +182,7 @@ function enviarResposta() {
 }
 
 function processarAcerto() {
+    // Incrementa acertos, atualiza placar, mostra animação de sucesso e busca nova charada.
     gameState.acertos++;
     atualizarPlacar();
 
@@ -166,6 +197,7 @@ function processarAcerto() {
 }
 
 function processarErro(mensagemExtra = "") {
+    // Incrementa erros, atualiza placar, mostra animação de erro e busca nova charada.
     gameState.erros++;
     atualizarPlacar();
 
@@ -182,11 +214,14 @@ function processarErro(mensagemExtra = "") {
 }
 
 function atualizarPlacar() {
+    // Atualiza os elementos HTML do placar com os valores atuais de acertos e erros.
     scoreCorrectEl.textContent = gameState.acertos;
     scoreWrongEl.textContent = gameState.erros;
 }
 
 function mostrarFeedback(texto, corClasse) {
+    // Exibe uma mensagem de feedback na tela com a cor especificada.
+    // A mensagem desaparece após alguns segundos.
     feedbackMsg.textContent = texto;
     // Reseta as classes temporárias
     feedbackMsg.className = `absolute bottom-6 left-0 right-0 text-xl font-bold transition-opacity duration-300 opacity-100 drop-shadow-lg ${corClasse}`;
@@ -198,6 +233,8 @@ function mostrarFeedback(texto, corClasse) {
 }
 
 function bloquearInput(estado) {
+    // Bloqueia ou desbloqueia o input do usuário e o botão de submit.
+    // Adiciona classes visuais para indicar o estado bloqueado.
     gameState.bloqueado = estado;
     answerInput.disabled = estado;
     btnSubmit.disabled = estado;
@@ -209,7 +246,10 @@ function bloquearInput(estado) {
 }
 
 // --- Mecânica de Tempo ---
+// Funções para gerenciar o timer no modo time: iniciar, parar e atualizar o display.
 function iniciarTimer() {
+    // Inicia o timer com 30 segundos, atualiza o display a cada segundo.
+    // Muda a cor para vermelho nos últimos 10 segundos e processa erro se acabar o tempo.
     gameState.tempoRestante = 30;
     atualizarDisplayTimer();
 
@@ -237,6 +277,7 @@ function iniciarTimer() {
 }
 
 function pararTimer() {
+    // Para o intervalo do timer se estiver ativo.
     if (gameState.intervalo) {
         clearInterval(gameState.intervalo);
         gameState.intervalo = null;
@@ -244,6 +285,7 @@ function pararTimer() {
 }
 
 function atualizarDisplayTimer() {
+    // Atualiza o display do timer com o tempo restante, formatado com dois dígitos.
     // PadStart para ficar visualmente fixo tipo 09, 08...
     timerEl.textContent = gameState.tempoRestante.toString().padStart(2, '0');
 }
